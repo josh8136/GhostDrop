@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Message | GhostDrop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top, #1a1a1a, #000000);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    .box {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 420px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 1.75rem;
+      background: linear-gradient(90deg, #38bdf8, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #0f172a;
+      color: white;
+      border: none;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .btn {
+      width: 100%;
+      margin-top: 1rem;
+      background: #3b82f6;
+      border: none;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #2563eb;
+    }
+    .msg {
+      margin-top: 1rem;
+      color: #22c55e;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Send Anonymous Message</h1>
+    <textarea id="message" placeholder="Write your message here..."></textarea>
+    <input type="text" id="tag" placeholder="Optional tag or username (e.g. john_doe)" />
+    <button class="btn" onclick="sendMessage()">Send Anonymously</button>
+    <div class="msg" id="successMsg">✅ Message sent successfully!</div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_KEY",
+      authDomain: "your-project.firebaseapp.com",
+      databaseURL: "https://your-project.firebaseio.com",
+      projectId: "your-project-id",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function sendMessage() {
+      const msgBox = document.getElementById('message');
+      const tagBox = document.getElementById('tag');
+      const msg = msgBox.value.trim();
+      const tag = tagBox.value.trim();
+      if (!msg) return alert('Please write a message first.');
+
+      const userId = 'user123';
+      const timestamp = Date.now();
+      const messageData = {
+        text: msg,
+        created: new Date().toISOString(),
+        tag: tag || null
+      };
+
+      db.ref(`messages/${userId}/${timestamp}`).set(messageData)
+        .then(() => {
+          msgBox.value = '';
+          tagBox.value = '';
+          document.getElementById('successMsg').style.display = 'block';
+          setTimeout(() => {
+            document.getElementById('successMsg').style.display = 'none';
+          }, 3000);
+        })
+        .catch((error) => {
+          alert('Error sending message: ' + error.message);
+        });
+    }
+  </script>
+</body>
+</html>
